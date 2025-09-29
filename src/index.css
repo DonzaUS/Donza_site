@@ -1,1 +1,12 @@
+/* === Глобальный фон на весь сайт === */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
 
+body {
+  background: url('/photo_1.jpg') center/cover no-repeat fixed;
+  background-attachment: fixed; /* чтобы не дергался при скролле */
+}

@@ -3,7 +3,7 @@ export default function Terms() {
     <div
       style={{
         backgroundImage: `
-          linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+          linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
           url("/photo_1.jpg")
         `,
         backgroundSize: "cover",

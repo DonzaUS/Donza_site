@@ -15,10 +15,6 @@ export default function Shop() {
     <div
       style={{
         minHeight: '100vh',
-        backgroundImage: `url('photo_1.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
         padding: '50px 15px',
       }}
     >
@@ -30,10 +26,10 @@ export default function Shop() {
               <div
                 className="card h-100 text-center shadow-sm"
                 style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.4)', // чёрный с прозрачностью 60%
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
                   backdropFilter: 'blur(5px)',
                   borderRadius: '10px',
-                  color: '#fff', // текст белый для контраста
+                  color: '#fff',
                 }}
               >
                 <div className="card-body">

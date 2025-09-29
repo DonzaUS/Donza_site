@@ -2,20 +2,31 @@ export default function Privacy() {
   return (
     <div
       style={{
+        /* картинка + затемнение */
         backgroundImage: `
-          linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-          url("/photo_1.jpg")
+          linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+          
         `,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundSize: "cover",       // подгоняет по ширине, не растягивая пропорции
+        backgroundPosition: "center",   // центрирует картинку
         backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
+        backgroundAttachment: "fixed",  // картинка «стоит», текст скроллится
+        minHeight: "100vh", 
+        width: "100%",
         color: "#ffffff",
-        minHeight: "100vh",
-        padding: "40px 16px"
+
+        /* чтобы контент скроллился внутри */
+        padding: "40px 16px",
+        display: "flex",
+        justifyContent: "center",
       }}
     >
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: 900,
+          width: "100%",
+        }}
+      >
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 18 }}>
           Политика конфиденциальности
         </h1>
