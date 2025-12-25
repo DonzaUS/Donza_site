@@ -13,7 +13,7 @@ export default function Navbar() {
 
           {/* Кнопка Telegram-канала сразу после названия */}
           <a
-            href="https://t.me/твой_канал" // ← Замени на реальную ссылку, например https://t.me/donzashop
+            href="https://t.me/Donza_uc" // ← Замени на реальную ссылку, например https://t.me/donzashop
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-outline-info btn-sm d-flex align-items-center"
