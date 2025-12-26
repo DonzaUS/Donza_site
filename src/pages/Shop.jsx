@@ -13,28 +13,35 @@ export default function Shop() {
     { uc: 32400, price: 31960 },
   ];
 
-  // Состояния для модального окна
+  // Состояния
   const [showModal, setShowModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null); // выбранный товар
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [gameId, setGameId] = useState(''); // Поле для ввода ID
   const [loading, setLoading] = useState(false);
 
-  // Открыть модал при клике на "Купить"
   const openModal = (item) => {
     setSelectedItem(item);
+    setGameId(''); // Очищаем поле при открытии
     setShowModal(true);
   };
 
-  // Закрыть модал
   const closeModal = () => {
     setShowModal(false);
     setSelectedItem(null);
+    setGameId('');
   };
 
-  // Обработка выбора метода и оплаты
   const handlePayment = async (method) => {
     if (!selectedItem) return;
 
+    // Проверка на gameId (игровой ID)
+    if (!gameId.trim()) {
+      alert('Введите ваш игровой ID!');
+      return;
+    }
+
     setLoading(true);
+
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
@@ -42,35 +49,33 @@ export default function Shop() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: selectedItem.price,
-          orderId,
-          method, // выбранный метод
-          email: 'client@telegram.org' // или из формы регистрации
+          amount: selectedItem.price,     // Сумма в рублях
+          orderId,                        // Уникальный ID заказа
+          method,                         // Выбранный метод оплаты
+          email: 'client@telegram.org',   // Можно заменить на реальный email
+          gameId: gameId.trim(),          // Игровой ID от игрока
+          uc: selectedItem.uc             // Количество UC
         })
       });
 
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = data.link; // Переход на оплату
+        window.location.href = data.link; // Переход на страницу оплаты FreeKassa
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
-      alert('Ошибка соединения с сервером');
+      console.error('Ошибка при оплате:', error);
+      alert('Ошибка соединения с сервером. Попробуйте позже.');
     } finally {
       setLoading(false);
-      closeModal(); // Закрываем модал после оплаты
+      closeModal(); // Закрываем модал в любом случае
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        padding: '50px 15px',
-      }}
-    >
+    <div style={{ minHeight: '100vh', padding: '50px 15px' }}>
       <div className="container">
         <h2 className="text-center mb-4 text-white">Магазин UC</h2>
         <div className="row g-4">
@@ -101,7 +106,7 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* Модальное окно выбора оплаты */}
+      {/* Модальное окно */}
       {showModal && selectedItem && (
         <div
           style={{
@@ -122,7 +127,7 @@ export default function Shop() {
               backgroundColor: '#fff',
               borderRadius: '12px',
               padding: '30px',
-              maxWidth: '400px',
+              maxWidth: '450px',
               width: '90%',
               textAlign: 'center',
               color: '#333',
@@ -145,43 +150,46 @@ export default function Shop() {
             </button>
 
             <h4 style={{ marginBottom: '20px' }}>
-              Выберите способ оплаты для {selectedItem.uc} UC ({selectedItem.price} ₽)
+              {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
+            {/* Поле для ввода игрового ID */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Введите ваш игровой ID (куда зачислить UC):
+              </label>
+              <input
+                type="text"
+                value={gameId}
+                onChange={(e) => setGameId(e.target.value)}
+                placeholder="Ваш ID / ник / UID"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  fontSize: '1rem',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                }}
+              />
+            </div>
+
+            <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: '#666' }}>
+              Выберите способ оплаты:
+            </p>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button
-                className="btn btn-primary"
-                onClick={() => handlePayment(44)}
-                disabled={loading}
-              >
+              <button className="btn btn-primary" onClick={() => handlePayment(44)} disabled={loading}>
                 {loading ? 'Загрузка...' : 'СБП (QR-код)'}
               </button>
-
-              <button
-                className="btn btn-success"
-                onClick={() => handlePayment(36)}
-                disabled={loading}
-              >
+              <button className="btn btn-success" onClick={() => handlePayment(36)} disabled={loading}>
                 {loading ? 'Загрузка...' : 'Банковская карта'}
               </button>
-
-              <button
-                className="btn btn-info"
-                onClick={() => handlePayment(43)}
-                disabled={loading}
-              >
+              <button className="btn btn-info" onClick={() => handlePayment(43)} disabled={loading}>
                 {loading ? 'Загрузка...' : 'SberPay'}
               </button>
-
-              <button
-                className="btn btn-warning"
-                onClick={() => handlePayment(45)}
-                disabled={loading}
-              >
+              <button className="btn btn-warning" onClick={() => handlePayment(45)} disabled={loading}>
                 {loading ? 'Загрузка...' : 'Тинькофф Pay'}
               </button>
-
-              {/* Добавь другие методы по желанию */}
             </div>
           </div>
         </div>
