@@ -33,7 +33,7 @@ export default function Shop() {
   const handlePayment = async (method) => {
     if (!selectedItem) return;
 
-    // Проверка ID ДО fetch
+    // Проверка на игровой ID
     if (!gameId.trim()) {
       alert('Введите ваш игровой ID!');
       return;
@@ -44,7 +44,7 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-      // Лог для теста — что отправляем
+      // Лог для проверки — что отправляем на сервер
       console.log('Отправляем на сервер:', {
         amount: selectedItem.price,
         orderId,
@@ -61,7 +61,7 @@ export default function Shop() {
           orderId,
           method,
           email: 'client@telegram.org',
-          gameId: gameId.trim(), // ← Обязательно передаётся
+          gameId: gameId.trim(),
           uc: selectedItem.uc
         })
       });
@@ -69,13 +69,13 @@ export default function Shop() {
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = data.link;
+        window.location.href = data.link; // Переход на оплату
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
-      console.error('Ошибка оплаты:', error);
-      alert('Ошибка соединения. Попробуйте позже.');
+      console.error('Ошибка при оплате:', error);
+      alert('Ошибка соединения с сервером. Попробуйте позже.');
     } finally {
       setLoading(false);
       closeModal();
