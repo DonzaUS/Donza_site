@@ -34,7 +34,7 @@ export default function Shop() {
   const handlePayment = async (method) => {
     if (!selectedItem) return;
 
-    // Проверка на gameId (игровой ID)
+    // Проверка на gameId ДО fetch
     if (!gameId.trim()) {
       alert('Введите ваш игровой ID!');
       return;
@@ -45,23 +45,32 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
+      // Тестовый лог — что именно отправляем на сервер
+      console.log('Отправляем на сервер:', {
+        amount: selectedItem.price,
+        orderId,
+        method,
+        gameId: gameId.trim(),
+        uc: selectedItem.uc
+      });
+
       const response = await fetch('https://api.donza.site/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: selectedItem.price,     // Сумма в рублях
-          orderId,                        // Уникальный ID заказа
-          method,                         // Выбранный метод оплаты
-          email: 'client@telegram.org',   // Можно заменить на реальный email
-          gameId: gameId.trim(),          // Игровой ID от игрока
-          uc: selectedItem.uc             // Количество UC
+          amount: selectedItem.price,
+          orderId,
+          method,
+          email: 'client@telegram.org',
+          gameId: gameId.trim(),
+          uc: selectedItem.uc
         })
       });
 
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = data.link; // Переход на страницу оплаты FreeKassa
+        window.location.href = data.link; // Переход на оплату
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
@@ -70,7 +79,7 @@ export default function Shop() {
       alert('Ошибка соединения с сервером. Попробуйте позже.');
     } finally {
       setLoading(false);
-      closeModal(); // Закрываем модал в любом случае
+      closeModal();
     }
   };
 
