@@ -13,15 +13,14 @@ export default function Shop() {
     { uc: 32400, price: 31960 },
   ];
 
-  // Состояния
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [gameId, setGameId] = useState(''); // Поле для ввода ID
+  const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
 
   const openModal = (item) => {
     setSelectedItem(item);
-    setGameId(''); // Очищаем поле при открытии
+    setGameId('');
     setShowModal(true);
   };
 
@@ -34,7 +33,7 @@ export default function Shop() {
   const handlePayment = async (method) => {
     if (!selectedItem) return;
 
-    // Проверка на gameId ДО fetch
+    // Проверка ID ДО fetch
     if (!gameId.trim()) {
       alert('Введите ваш игровой ID!');
       return;
@@ -45,7 +44,7 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-      // Тестовый лог — что именно отправляем на сервер
+      // Лог для теста — что отправляем
       console.log('Отправляем на сервер:', {
         amount: selectedItem.price,
         orderId,
@@ -62,7 +61,7 @@ export default function Shop() {
           orderId,
           method,
           email: 'client@telegram.org',
-          gameId: gameId.trim(),
+          gameId: gameId.trim(), // ← Обязательно передаётся
           uc: selectedItem.uc
         })
       });
@@ -70,13 +69,13 @@ export default function Shop() {
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = data.link; // Переход на оплату
+        window.location.href = data.link;
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
-      console.error('Ошибка при оплате:', error);
-      alert('Ошибка соединения с сервером. Попробуйте позже.');
+      console.error('Ошибка оплаты:', error);
+      alert('Ошибка соединения. Попробуйте позже.');
     } finally {
       setLoading(false);
       closeModal();
@@ -115,7 +114,6 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* Модальное окно */}
       {showModal && selectedItem && (
         <div
           style={{
@@ -162,7 +160,6 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            {/* Поле для ввода игрового ID */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
                 Введите ваш игровой ID (куда зачислить UC):
