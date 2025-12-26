@@ -33,7 +33,7 @@ export default function Shop() {
   const handlePayment = async (method) => {
     if (!selectedItem) return;
 
-    // Проверка на игровой ID
+    // Проверка ID
     if (!gameId.trim()) {
       alert('Введите ваш игровой ID!');
       return;
@@ -44,38 +44,38 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-      // Лог для проверки — что отправляем на сервер
-      console.log('Отправляем на сервер:', {
+      // Явно формируем payload и логируем
+      const payload = {
         amount: selectedItem.price,
-        orderId,
-        method,
+        orderId: orderId,
+        method: method,
+        email: 'client@telegram.org',
         gameId: gameId.trim(),
         uc: selectedItem.uc
-      });
+      };
+
+      console.log('Отправляем на сервер (полный payload):', payload);
 
       const response = await fetch('https://api.donza.site/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: selectedItem.price,
-          orderId,
-          method,
-          email: 'client@telegram.org',
-          gameId: gameId.trim(),
-          uc: selectedItem.uc
-        })
+        body: JSON.stringify(payload)
       });
+
+      console.log('Ответ от сервера статус:', response.status);
 
       const data = await response.json();
 
+      console.log('Ответ от сервера:', data);
+
       if (data.success) {
-        window.location.href = data.link; // Переход на оплату
+        window.location.href = data.link;
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
-      console.error('Ошибка при оплате:', error);
-      alert('Ошибка соединения с сервером. Попробуйте позже.');
+      console.error('Ошибка fetch:', error);
+      alert('Ошибка соединения с сервером');
     } finally {
       setLoading(false);
       closeModal();
