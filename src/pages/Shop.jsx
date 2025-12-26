@@ -31,56 +31,56 @@ export default function Shop() {
   };
 
   const handlePayment = async (method) => {
-    if (!selectedItem) return;
+  if (!selectedItem) return;
 
-    // Проверка ID
-    if (!gameId.trim()) {
-      alert('Введите ваш игровой ID!');
-      return;
+  // Проверка на gameId
+  if (!gameId.trim()) {
+    alert('Введите ваш игровой ID!');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const orderId = `order-${selectedItem.uc}-${Date.now()}`;
+
+    // Явно формируем payload и сразу логируем — это покажет ТОЧНО, что отправляется
+    const payload = {
+      amount: selectedItem.price,
+      orderId,
+      method,
+      email: 'client@telegram.org',
+      gameId: gameId.trim(),
+      uc: selectedItem.uc
+    };
+
+    console.log('ТОЧНО ОТПРАВЛЯЕМ НА СЕРВЕР:', payload);
+
+    const response = await fetch('https://api.donza.site/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    console.log('Статус ответа сервера:', response.status);
+
+    const data = await response.json();
+
+    console.log('Ответ от сервера:', data);
+
+    if (data.success) {
+      window.location.href = data.link;
+    } else {
+      alert(data.error || 'Ошибка создания заказа');
     }
-
-    setLoading(true);
-
-    try {
-      const orderId = `order-${selectedItem.uc}-${Date.now()}`;
-
-      // Явно формируем payload и логируем
-      const payload = {
-        amount: selectedItem.price,
-        orderId: orderId,
-        method: method,
-        email: 'client@telegram.org',
-        gameId: gameId.trim(),
-        uc: selectedItem.uc
-      };
-
-      console.log('Отправляем на сервер (полный payload):', payload);
-
-      const response = await fetch('https://api.donza.site/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      console.log('Ответ от сервера статус:', response.status);
-
-      const data = await response.json();
-
-      console.log('Ответ от сервера:', data);
-
-      if (data.success) {
-        window.location.href = data.link;
-      } else {
-        alert(data.error || 'Ошибка создания заказа');
-      }
-    } catch (error) {
-      console.error('Ошибка fetch:', error);
-      alert('Ошибка соединения с сервером');
-    } finally {
-      setLoading(false);
-      closeModal();
-    }
-  };
+  } catch (error) {
+    console.error('Ошибка fetch:', error);
+    alert('Ошибка соединения с сервером');
+  } finally {
+    setLoading(false);
+    closeModal();
+  }
+};
 
   return (
     <div style={{ minHeight: '100vh', padding: '50px 15px' }}>
