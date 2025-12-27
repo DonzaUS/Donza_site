@@ -17,7 +17,7 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на оплату от API
+  const [paymentUrl, setPaymentUrl] = useState('');
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -33,7 +33,7 @@ export default function Shop() {
     setPaymentUrl('');
   };
 
-  const handlePay = async (methodId) => {
+  const handlePay = async (method) => {
     if (!selectedItem) return;
 
     if (!gameId.trim()) {
@@ -52,22 +52,22 @@ export default function Shop() {
         body: JSON.stringify({
           amount: selectedItem.price,
           orderId,
-          method: methodId, // Передаём ID метода (44, 36, 35)
           gameId: gameId.trim(),
-          uc: selectedItem.uc
+          uc: selectedItem.uc,
+          method  // Передаём ID метода (44, 36, 35)
         })
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setPaymentUrl(data.link); // Открываем форму оплаты в iframe
+        setPaymentUrl(data.link);
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка соединения с сервером');
+      alert('Ошибка соединения');
     } finally {
       setLoading(false);
     }
@@ -175,21 +175,21 @@ export default function Shop() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <button
                     className="btn btn-primary btn-lg"
-                    onClick={() => handlePay(44)} // СБП (QR-код)
+                    onClick={() => handlePay(44)} // СБП
                     disabled={loading || !gameId.trim()}
                   >
                     {loading ? 'Загрузка...' : 'СБП (QR-код)'}
                   </button>
                   <button
                     className="btn btn-success btn-lg"
-                    onClick={() => handlePay(36)} // Visa/MasterCard/МИР
+                    onClick={() => handlePay(36)} // Карты
                     disabled={loading || !gameId.trim()}
                   >
                     {loading ? 'Загрузка...' : 'Банковская карта'}
                   </button>
                   <button
                     className="btn btn-info btn-lg"
-                    onClick={() => handlePay(35)} // QIWI (если нужно)
+                    onClick={() => handlePay(35)} // QIWI
                     disabled={loading || !gameId.trim()}
                   >
                     {loading ? 'Загрузка...' : 'QIWI'}
