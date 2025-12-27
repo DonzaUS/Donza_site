@@ -17,12 +17,11 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState('');
 
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
-    setPaymentUrl('');
+    setLoading(false);
     setShowModal(true);
   };
 
@@ -30,7 +29,6 @@ export default function Shop() {
     setShowModal(false);
     setSelectedItem(null);
     setGameId('');
-    setPaymentUrl('');
   };
 
   const handlePay = async (method) => {
@@ -54,20 +52,20 @@ export default function Shop() {
           orderId,
           gameId: gameId.trim(),
           uc: selectedItem.uc,
-          method  // Передаём ID метода (44, 36, 35)
+          method  // 44 - СБП, 36 - карты, 35 - QIWI
         })
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setPaymentUrl(data.link);
+        window.location.href = data.link;  // Редирект на оплату (самый надёжный способ)
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка соединения');
+      alert('Ошибка соединения с сервером');
     } finally {
       setLoading(false);
     }
@@ -151,65 +149,48 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            {!paymentUrl && (
-              <>
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    Введите ваш игровой ID (куда зачислить UC):
-                  </label>
-                  <input
-                    type="text"
-                    value={gameId}
-                    onChange={(e) => setGameId(e.target.value)}
-                    placeholder="Ваш ID / ник / UID"
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      fontSize: '1rem',
-                      borderRadius: '6px',
-                      border: '1px solid #ccc',
-                    }}
-                  />
-                </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Введите ваш игровой ID (куда зачислить UC):
+              </label>
+              <input
+                type="text"
+                value={gameId}
+                onChange={(e) => setGameId(e.target.value)}
+                placeholder="Ваш ID / ник / UID"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  fontSize: '1rem',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                }}
+              />
+            </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <button
-                    className="btn btn-primary btn-lg"
-                    onClick={() => handlePay(44)} // СБП
-                    disabled={loading || !gameId.trim()}
-                  >
-                    {loading ? 'Загрузка...' : 'СБП (QR-код)'}
-                  </button>
-                  <button
-                    className="btn btn-success btn-lg"
-                    onClick={() => handlePay(36)} // Карты
-                    disabled={loading || !gameId.trim()}
-                  >
-                    {loading ? 'Загрузка...' : 'Банковская карта'}
-                  </button>
-                  <button
-                    className="btn btn-info btn-lg"
-                    onClick={() => handlePay(35)} // QIWI
-                    disabled={loading || !gameId.trim()}
-                  >
-                    {loading ? 'Загрузка...' : 'QIWI'}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {paymentUrl && (
-              <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
-                <iframe
-                  src={paymentUrl}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                  title="Оплата FreeKassa"
-                  allow="payment"
-                />
-              </div>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                className="btn btn-primary btn-lg"
+                onClick={() => handlePay(44)}
+                disabled={loading || !gameId.trim()}
+              >
+                {loading ? 'Загрузка...' : 'СБП (QR-код)'}
+              </button>
+              <button
+                className="btn btn-success btn-lg"
+                onClick={() => handlePay(36)}
+                disabled={loading || !gameId.trim()}
+              >
+                {loading ? 'Загрузка...' : 'Банковская карта'}
+              </button>
+              <button
+                className="btn btn-info btn-lg"
+                onClick={() => handlePay(35)}
+                disabled={loading || !gameId.trim()}
+              >
+                {loading ? 'Загрузка...' : 'QIWI'}
+              </button>
+            </div>
           </div>
         </div>
       )}
