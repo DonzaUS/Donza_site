@@ -22,7 +22,7 @@ export default function Shop() {
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
-    setPaymentUrl(''); // Сбрасываем предыдущую оплату
+    setPaymentUrl('');
     setShowModal(true);
   };
 
@@ -33,7 +33,7 @@ export default function Shop() {
     setPaymentUrl('');
   };
 
-  const handlePayment = (method) => {
+  const handlePay = () => {
     if (!selectedItem) return;
 
     if (!gameId.trim()) {
@@ -45,19 +45,18 @@ export default function Shop() {
 
     const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-    // Базовая ссылка твоего виджета + параметры
+    // Твоя базовая ссылка + обязательные параметры
     const baseUrl = 'https://pay.freekassa.net/?m=68423&oa=&o=&s=b021731eee569d22d744d81bed49e7f3&currency=RUB';
     const params = new URLSearchParams({
-      sum: selectedItem.price, // Сумма
-      o: orderId,              // Номер заказа
-      desc: `${selectedItem.uc} UC в Donza - ${gameId}`, // Описание с ID игрока
+      sum: selectedItem.price,               // Сумма (обязательно)
+      o: orderId,                            // Номер заказа (обязательно)
+      desc: `${selectedItem.uc} UC в Donza - ID: ${gameId.trim()}`, // Описание
       lang: 'ru',
-      // Можно добавить email, success_url и т.д. если нужно
     });
 
     const fullUrl = `${baseUrl}&${params.toString()}`;
 
-    setPaymentUrl(fullUrl); // Показываем iframe
+    setPaymentUrl(fullUrl); // Показываем витрину FreeKassa
     setLoading(false);
   };
 
@@ -139,51 +138,39 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            {/* Поле для ввода игрового ID */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                Введите ваш игровой ID (куда зачислить UC):
-              </label>
-              <input
-                type="text"
-                value={gameId}
-                onChange={(e) => setGameId(e.target.value)}
-                placeholder="Ваш ID / ник / UID"
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  fontSize: '1rem',
-                  borderRadius: '6px',
-                  border: '1px solid #ccc',
-                }}
-              />
-            </div>
+            {/* Поле для ввода ID */}
+            {!paymentUrl && (
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                  Введите ваш игровой ID (куда зачислить UC):
+                </label>
+                <input
+                  type="text"
+                  value={gameId}
+                  onChange={(e) => setGameId(e.target.value)}
+                  placeholder="Ваш ID / ник / UID"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    fontSize: '1rem',
+                    borderRadius: '6px',
+                    border: '1px solid #ccc',
+                  }}
+                />
+              </div>
+            )}
 
+            {/* Кнопка "Оплатить" или витрина */}
             {!paymentUrl ? (
-              <>
-                <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: '#666' }}>
-                  Выберите способ оплаты:
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <button className="btn btn-primary" onClick={() => handlePayment(44)} disabled={loading}>
-                    {loading ? 'Загрузка...' : 'СБП (QR-код)'}
-                  </button>
-                  <button className="btn btn-success" onClick={() => handlePayment(36)} disabled={loading}>
-                    {loading ? 'Загрузка...' : 'Банковская карта'}
-                  </button>
-                  <button className="btn btn-info" onClick={() => handlePayment(43)} disabled={loading}>
-                    {loading ? 'Загрузка...' : 'SberPay'}
-                  </button>
-                  <button className="btn btn-warning" onClick={() => handlePayment(45)} disabled={loading}>
-                    {loading ? 'Загрузка...' : 'Тинькофф Pay'}
-                  </button>
-                </div>
-              </>
-            ) : null}
-
-            {/* Витрина оплаты FreeKassa в iframe */}
-            {paymentUrl && (
+              <button
+                className="btn btn-success btn-lg"
+                onClick={handlePay}
+                disabled={loading || !gameId.trim()}
+                style={{ width: '100%', padding: '12px', fontSize: '1.2rem' }}
+              >
+                {loading ? 'Загрузка...' : 'Оплатить'}
+              </button>
+            ) : (
               <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
                 <iframe
                   src={paymentUrl}
