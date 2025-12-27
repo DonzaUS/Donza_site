@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function Shop() {
   const items = [
@@ -17,7 +17,7 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на оплату от API
+  const [paymentUrl, setPaymentUrl] = useState('');
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -33,7 +33,7 @@ export default function Shop() {
     setPaymentUrl('');
   };
 
-  const handlePay = async () => {
+  const handlePay = async (methodId) => {
     if (!selectedItem) return;
 
     if (!gameId.trim()) {
@@ -52,6 +52,7 @@ export default function Shop() {
         body: JSON.stringify({
           amount: selectedItem.price,
           orderId,
+          method: methodId, // Вот здесь передаём правильный ID метода!
           gameId: gameId.trim(),
           uc: selectedItem.uc
         })
@@ -61,28 +62,16 @@ export default function Shop() {
 
       if (data.success) {
         setPaymentUrl(data.link);
-        // Автоматический редирект будет обработан в useEffect ниже
       } else {
         alert(data.error || 'Ошибка создания заказа');
-        setLoading(false);
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка соединения с сервером');
+      alert('Ошибка соединения');
+    } finally {
       setLoading(false);
     }
   };
-
-  // Автоматический редирект через 3 секунды после получения ссылки
-  useEffect(() => {
-    if (paymentUrl) {
-      const timer = setTimeout(() => {
-        window.location.href = paymentUrl;
-      }, 3000);
-
-      return () => clearTimeout(timer); // Очистка, если пользователь закроет модалку
-    }
-  }, [paymentUrl]);
 
   return (
     <div style={{ minHeight: '100vh', padding: '50px 15px' }}>
@@ -162,7 +151,6 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            {/* Поле ввода ID и кнопка оплаты */}
             {!paymentUrl && (
               <>
                 <div style={{ marginBottom: '20px' }}>
@@ -184,34 +172,42 @@ export default function Shop() {
                   />
                 </div>
 
-                <button
-                  className="btn btn-success btn-lg"
-                  onClick={handlePay}
-                  disabled={loading || !gameId.trim()}
-                  style={{ width: '100%', padding: '12px', fontSize: '1.2rem' }}
-                >
-                  {loading ? 'Загрузка...' : 'Оплатить'}
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handlePay(44)} // СБП (QR-код)
+                    disabled={loading || !gameId.trim()}
+                  >
+                    {loading ? 'Загрузка...' : 'СБП (QR-код)'}
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => handlePay(36)} // Visa/MasterCard/МИР
+                    disabled={loading || !gameId.trim()}
+                  >
+                    {loading ? 'Загрузка...' : 'Банковская карта'}
+                  </button>
+                  <button
+                    className="btn btn-info"
+                    onClick={() => handlePay(35)} // QIWI (если нужно)
+                    disabled={loading || !gameId.trim()}
+                  >
+                    {loading ? 'Загрузка...' : 'QIWI'}
+                  </button>
+                </div>
               </>
             )}
 
-            {/* Блок с редиректом на оплату */}
             {paymentUrl && (
-              <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
-                  Перенаправляем вас на страницу оплаты...
-                </p>
-                <button
-                  className="btn btn-success btn-lg"
-                  onClick={() => window.location.href = paymentUrl}
-                  style={{ width: '100%', padding: '15px', fontSize: '1.2rem' }}
-                >
-                  Перейти к оплате
-                </button>
-                <p style={{ marginTop: '20px', fontSize: '0.9rem', color: '#666' }}>
-                  Если перенаправление не произошло автоматически через несколько секунд,<br />
-                  нажмите кнопку выше.
-                </p>
+              <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
+                <iframe
+                  src={paymentUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  title="Оплата FreeKassa"
+                  allow="payment"
+                />
               </div>
             )}
           </div>
