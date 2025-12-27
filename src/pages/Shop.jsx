@@ -47,16 +47,15 @@ export default function Shop() {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
       const response = await fetch('https://api.donza.site/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: selectedItem.price,
-          orderId,
-          method: methodId, // Вот здесь передаём правильный ID метода!
-          gameId: gameId.trim(),
-          uc: selectedItem.uc
-        })
-      });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    amount: selectedItem.price,
+    orderId: `order-${selectedItem.uc}-${Date.now()}`,
+    gameId: gameId.trim(),
+    uc: selectedItem.uc
+  })
+});
 
       const data = await response.json();
 
