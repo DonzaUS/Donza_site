@@ -17,12 +17,12 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState('');
+  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на витрину FreeKassa
 
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
-    setPaymentUrl('');
+    setPaymentUrl(''); // Сбрасываем оплату при открытии
     setShowModal(true);
   };
 
@@ -45,19 +45,15 @@ export default function Shop() {
 
     const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-    // Твой API-ключ от виджета (из FreeKassa)
-    const widgetApiKey = 'ab7a75b760b7627159a4c383deb6183f';
-
-    // Базовая ссылка + параметры (FreeKassa требует правильную подпись, но для виджета можно использовать упрощённо)
+    // Твоя базовая ссылка + обязательные параметры
     const baseUrl = 'https://pay.freekassa.net/?';
     const params = new URLSearchParams({
-      m: '68423',
-      oa: selectedItem.price,  // Сумма
-      o: orderId,              // Номер заказа
+      m: '68423',                  // ID магазина
+      oa: selectedItem.price,      // Сумма (обязательно)
+      o: orderId,                  // Номер заказа (обязательно)
       currency: 'RUB',
-      desc: `${selectedItem.uc} UC в Donza - ID: ${gameId.trim()}`,
+      desc: `${selectedItem.uc} UC в Donza - ID: ${gameId.trim()}`, // Описание
       lang: 'ru',
-      // Подпись генерируется на основе параметров, но FreeKassa для виджетов иногда принимает без s
     });
 
     const fullUrl = `${baseUrl}${params.toString()}`;
@@ -144,6 +140,7 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
+            {/* Поле ввода ID и кнопка "Оплатить" */}
             {!paymentUrl && (
               <>
                 <div style={{ marginBottom: '20px' }}>
@@ -176,6 +173,7 @@ export default function Shop() {
               </>
             )}
 
+            {/* Витрина FreeKassa в iframe */}
             {paymentUrl && (
               <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
                 <iframe
