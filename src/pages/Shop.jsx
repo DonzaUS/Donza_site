@@ -17,7 +17,7 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState('');
+  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на оплату от API
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -47,26 +47,27 @@ export default function Shop() {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
       const response = await fetch('https://api.donza.site/create-payment', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    amount: selectedItem.price,
-    orderId: `order-${selectedItem.uc}-${Date.now()}`,
-    gameId: gameId.trim(),
-    uc: selectedItem.uc
-  })
-});
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: selectedItem.price,
+          orderId,
+          method: methodId, // Передаём ID метода (44, 36, 35)
+          gameId: gameId.trim(),
+          uc: selectedItem.uc
+        })
+      });
 
       const data = await response.json();
 
       if (data.success) {
-        setPaymentUrl(data.link);
+        setPaymentUrl(data.link); // Открываем форму оплаты в iframe
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
     } catch (error) {
       console.error('Ошибка:', error);
-      alert('Ошибка соединения');
+      alert('Ошибка соединения с сервером');
     } finally {
       setLoading(false);
     }
@@ -173,21 +174,21 @@ export default function Shop() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary btn-lg"
                     onClick={() => handlePay(44)} // СБП (QR-код)
                     disabled={loading || !gameId.trim()}
                   >
                     {loading ? 'Загрузка...' : 'СБП (QR-код)'}
                   </button>
                   <button
-                    className="btn btn-success"
+                    className="btn btn-success btn-lg"
                     onClick={() => handlePay(36)} // Visa/MasterCard/МИР
                     disabled={loading || !gameId.trim()}
                   >
                     {loading ? 'Загрузка...' : 'Банковская карта'}
                   </button>
                   <button
-                    className="btn btn-info"
+                    className="btn btn-info btn-lg"
                     onClick={() => handlePay(35)} // QIWI (если нужно)
                     disabled={loading || !gameId.trim()}
                   >
