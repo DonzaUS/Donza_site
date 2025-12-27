@@ -17,7 +17,7 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на страницу оплаты FreeKassa
+  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на оплату от API
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -33,7 +33,7 @@ export default function Shop() {
     setPaymentUrl('');
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     if (!selectedItem) return;
 
     if (!gameId.trim()) {
@@ -43,22 +43,33 @@ export default function Shop() {
 
     setLoading(true);
 
-    // Генерируем уникальный orderId
-    const orderId = `order-${selectedItem.uc}-${Date.now()}`;
+    try {
+      const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-    // Формируем URL для оплаты (замени baseUrl на свою реальную ссылку из FreeKassa, если нужно)
-    const baseUrl = 'https://pay.freekassa.net/?m=68423&currency=RUB';
-    const params = new URLSearchParams({
-      oa: selectedItem.price, // Сумма (обязательно)
-      o: orderId,             // Номер заказа (обязательно)
-      desc: `${selectedItem.uc} UC в Donza - ID: ${gameId.trim()}`, // Описание
-      lang: 'ru',
-    });
+      const response = await fetch('https://api.donza.site/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: selectedItem.price,
+          orderId,
+          gameId: gameId.trim(),
+          uc: selectedItem.uc
+        })
+      });
 
-    const fullUrl = `${baseUrl}&${params.toString()}`;
+      const data = await response.json();
 
-    setPaymentUrl(fullUrl);
-    setLoading(false);
+      if (data.success) {
+        setPaymentUrl(data.link); // Открываем оплату в iframe
+      } else {
+        alert(data.error || 'Ошибка создания заказа');
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Ошибка соединения с сервером');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -139,7 +150,7 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            {/* Поле ввода ID и кнопка "Оплатить" */}
+            {/* Поле ID и кнопка "Оплатить" */}
             {!paymentUrl && (
               <>
                 <div style={{ marginBottom: '20px' }}>
@@ -172,7 +183,7 @@ export default function Shop() {
               </>
             )}
 
-            {/* Витрина FreeKassa в iframe */}
+            {/* Страница оплаты FreeKassa в iframe */}
             {paymentUrl && (
               <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
                 <iframe
