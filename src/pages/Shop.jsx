@@ -17,10 +17,12 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на витрину FreeKassa
 
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
+    setPaymentUrl(''); // Сбрасываем предыдущую оплату
     setShowModal(true);
   };
 
@@ -28,59 +30,36 @@ export default function Shop() {
     setShowModal(false);
     setSelectedItem(null);
     setGameId('');
+    setPaymentUrl('');
   };
 
-  const handlePayment = async (method) => {
-  if (!selectedItem) return;
+  const handlePayment = (method) => {
+    if (!selectedItem) return;
 
-  // Проверка на gameId
-  if (!gameId.trim()) {
-    alert('Введите ваш игровой ID!');
-    return;
-  }
+    if (!gameId.trim()) {
+      alert('Введите ваш игровой ID!');
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
     const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-    // Явно формируем payload и сразу логируем — это покажет ТОЧНО, что отправляется
-    const payload = {
-      amount: selectedItem.price,
-      orderId,
-      method,
-      email: 'client@telegram.org',
-      gameId: gameId.trim(),
-      uc: selectedItem.uc
-    };
-
-    console.log('ТОЧНО ОТПРАВЛЯЕМ НА СЕРВЕР:', payload);
-
-    const response = await fetch('https://api.donza.site/create-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    // Базовая ссылка твоего виджета + параметры
+    const baseUrl = 'https://pay.freekassa.net/?m=68423&oa=&o=&s=b021731eee569d22d744d81bed49e7f3&currency=RUB';
+    const params = new URLSearchParams({
+      sum: selectedItem.price, // Сумма
+      o: orderId,              // Номер заказа
+      desc: `${selectedItem.uc} UC в Donza - ${gameId}`, // Описание с ID игрока
+      lang: 'ru',
+      // Можно добавить email, success_url и т.д. если нужно
     });
 
-    console.log('Статус ответа сервера:', response.status);
+    const fullUrl = `${baseUrl}&${params.toString()}`;
 
-    const data = await response.json();
-
-    console.log('Ответ от сервера:', data);
-
-    if (data.success) {
-      window.location.href = data.link;
-    } else {
-      alert(data.error || 'Ошибка создания заказа');
-    }
-  } catch (error) {
-    console.error('Ошибка fetch:', error);
-    alert('Ошибка соединения с сервером');
-  } finally {
+    setPaymentUrl(fullUrl); // Показываем iframe
     setLoading(false);
-    closeModal();
-  }
-};
+  };
 
   return (
     <div style={{ minHeight: '100vh', padding: '50px 15px' }}>
@@ -134,7 +113,7 @@ export default function Shop() {
               backgroundColor: '#fff',
               borderRadius: '12px',
               padding: '30px',
-              maxWidth: '450px',
+              maxWidth: '600px',
               width: '90%',
               textAlign: 'center',
               color: '#333',
@@ -160,6 +139,7 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
+            {/* Поле для ввода игрового ID */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
                 Введите ваш игровой ID (куда зачислить UC):
@@ -179,24 +159,42 @@ export default function Shop() {
               />
             </div>
 
-            <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: '#666' }}>
-              Выберите способ оплаты:
-            </p>
+            {!paymentUrl ? (
+              <>
+                <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: '#666' }}>
+                  Выберите способ оплаты:
+                </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button className="btn btn-primary" onClick={() => handlePayment(44)} disabled={loading}>
-                {loading ? 'Загрузка...' : 'СБП (QR-код)'}
-              </button>
-              <button className="btn btn-success" onClick={() => handlePayment(36)} disabled={loading}>
-                {loading ? 'Загрузка...' : 'Банковская карта'}
-              </button>
-              <button className="btn btn-info" onClick={() => handlePayment(43)} disabled={loading}>
-                {loading ? 'Загрузка...' : 'SberPay'}
-              </button>
-              <button className="btn btn-warning" onClick={() => handlePayment(45)} disabled={loading}>
-                {loading ? 'Загрузка...' : 'Тинькофф Pay'}
-              </button>
-            </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button className="btn btn-primary" onClick={() => handlePayment(44)} disabled={loading}>
+                    {loading ? 'Загрузка...' : 'СБП (QR-код)'}
+                  </button>
+                  <button className="btn btn-success" onClick={() => handlePayment(36)} disabled={loading}>
+                    {loading ? 'Загрузка...' : 'Банковская карта'}
+                  </button>
+                  <button className="btn btn-info" onClick={() => handlePayment(43)} disabled={loading}>
+                    {loading ? 'Загрузка...' : 'SberPay'}
+                  </button>
+                  <button className="btn btn-warning" onClick={() => handlePayment(45)} disabled={loading}>
+                    {loading ? 'Загрузка...' : 'Тинькофф Pay'}
+                  </button>
+                </div>
+              </>
+            ) : null}
+
+            {/* Витрина оплаты FreeKassa в iframe */}
+            {paymentUrl && (
+              <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
+                <iframe
+                  src={paymentUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  title="Оплата FreeKassa"
+                  allow="payment"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
