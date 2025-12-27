@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function Shop() {
   const items = [
@@ -60,29 +60,17 @@ export default function Shop() {
       const data = await response.json();
 
       if (data.success) {
-        setPaymentUrl(data.link);
-        // Автоматический редирект будет обработан в useEffect ниже
+        setPaymentUrl(data.link); // Открываем оплату в iframe
       } else {
         alert(data.error || 'Ошибка создания заказа');
-        setLoading(false);
       }
     } catch (error) {
       console.error('Ошибка:', error);
       alert('Ошибка соединения с сервером');
+    } finally {
       setLoading(false);
     }
   };
-
-  // Автоматический редирект через 3 секунды после получения ссылки
-  useEffect(() => {
-    if (paymentUrl) {
-      const timer = setTimeout(() => {
-        window.location.href = paymentUrl;
-      }, 3000);
-
-      return () => clearTimeout(timer); // Очистка, если пользователь закроет модалку
-    }
-  }, [paymentUrl]);
 
   return (
     <div style={{ minHeight: '100vh', padding: '50px 15px' }}>
@@ -162,7 +150,7 @@ export default function Shop() {
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            {/* Поле ввода ID и кнопка оплаты */}
+            {/* Поле ID и кнопка "Оплатить" */}
             {!paymentUrl && (
               <>
                 <div style={{ marginBottom: '20px' }}>
@@ -195,23 +183,17 @@ export default function Shop() {
               </>
             )}
 
-            {/* Блок с редиректом на оплату */}
+            {/* Страница оплаты FreeKassa в iframe */}
             {paymentUrl && (
-              <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                <p style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
-                  Перенаправляем вас на страницу оплаты...
-                </p>
-                <button
-                  className="btn btn-success btn-lg"
-                  onClick={() => window.location.href = paymentUrl}
-                  style={{ width: '100%', padding: '15px', fontSize: '1.2rem' }}
-                >
-                  Перейти к оплате
-                </button>
-                <p style={{ marginTop: '20px', fontSize: '0.9rem', color: '#666' }}>
-                  Если перенаправление не произошло автоматически через несколько секунд,<br />
-                  нажмите кнопку выше.
-                </p>
+              <div style={{ marginTop: '20px', width: '100%', height: '600px' }}>
+                <iframe
+                  src={paymentUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  title="Оплата FreeKassa"
+                  allow="payment"
+                />
               </div>
             )}
           </div>
