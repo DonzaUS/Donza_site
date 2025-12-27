@@ -22,7 +22,7 @@ export default function Shop() {
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
-    setPaymentUrl(''); // Сбрасываем оплату при каждом открытии
+    setPaymentUrl('');
     setShowModal(true);
   };
 
@@ -46,8 +46,8 @@ export default function Shop() {
     // Генерируем уникальный orderId
     const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-    // Формируем URL для оплаты (замени на свою реальную ссылку из FreeKassa, если нужно)
-    const baseUrl = 'https://pay.freekassa.net/?m=68423&currency=RUB'; // Базовая часть
+    // Формируем URL для оплаты (замени baseUrl на свою реальную ссылку из FreeKassa, если нужно)
+    const baseUrl = 'https://pay.freekassa.net/?m=68423&currency=RUB';
     const params = new URLSearchParams({
       oa: selectedItem.price, // Сумма (обязательно)
       o: orderId,             // Номер заказа (обязательно)
