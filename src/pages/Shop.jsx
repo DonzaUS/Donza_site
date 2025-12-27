@@ -17,12 +17,12 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на витрину FreeKassa
+  const [paymentUrl, setPaymentUrl] = useState(''); // Ссылка на страницу оплаты FreeKassa
 
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
-    setPaymentUrl(''); // Сбрасываем оплату при открытии
+    setPaymentUrl(''); // Сбрасываем оплату при каждом открытии
     setShowModal(true);
   };
 
@@ -43,20 +43,19 @@ export default function Shop() {
 
     setLoading(true);
 
+    // Генерируем уникальный orderId
     const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-    // Твоя базовая ссылка + обязательные параметры
-    const baseUrl = 'https://pay.freekassa.net/?';
+    // Формируем URL для оплаты (замени на свою реальную ссылку из FreeKassa, если нужно)
+    const baseUrl = 'https://pay.freekassa.net/?m=68423&currency=RUB'; // Базовая часть
     const params = new URLSearchParams({
-      m: '68423',                  // ID магазина
-      oa: selectedItem.price,      // Сумма (обязательно)
-      o: orderId,                  // Номер заказа (обязательно)
-      currency: 'RUB',
+      oa: selectedItem.price, // Сумма (обязательно)
+      o: orderId,             // Номер заказа (обязательно)
       desc: `${selectedItem.uc} UC в Donza - ID: ${gameId.trim()}`, // Описание
       lang: 'ru',
     });
 
-    const fullUrl = `${baseUrl}${params.toString()}`;
+    const fullUrl = `${baseUrl}&${params.toString()}`;
 
     setPaymentUrl(fullUrl);
     setLoading(false);
