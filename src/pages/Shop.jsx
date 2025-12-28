@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 export default function Shop() {
   const items = [
-    { uc: 325, price: 425 },
+    { uc: 325, price: 400 },
     { uc: 660, price: 850 },
     { uc: 1320, price: 1700 },
     { uc: 1800, price: 2125 },
