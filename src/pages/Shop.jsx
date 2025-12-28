@@ -59,7 +59,7 @@ export default function Shop() {
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = data.link;  // Редирект на оплату (самый надёжный способ)
+        window.location.href = data.link;  // Полный редирект на страницу оплаты
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
@@ -176,6 +176,7 @@ export default function Shop() {
               >
                 {loading ? 'Загрузка...' : 'СБП (QR-код)'}
               </button>
+
               <button
                 className="btn btn-success btn-lg"
                 onClick={() => handlePay(36)}
@@ -183,6 +184,7 @@ export default function Shop() {
               >
                 {loading ? 'Загрузка...' : 'Банковская карта'}
               </button>
+
               <button
                 className="btn btn-info btn-lg"
                 onClick={() => handlePay(35)}
