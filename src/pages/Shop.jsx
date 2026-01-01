@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function Shop() {
   const items = [
@@ -15,12 +15,12 @@ export default function Shop() {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [gameId, setGameId] = useState('');
+  const [gameId, setGameId] = useState("");
   const [loading, setLoading] = useState(false);
 
   const openModal = (item) => {
     setSelectedItem(item);
-    setGameId('');
+    setGameId("");
     setLoading(false);
     setShowModal(true);
   };
@@ -28,14 +28,14 @@ export default function Shop() {
   const closeModal = () => {
     setShowModal(false);
     setSelectedItem(null);
-    setGameId('');
+    setGameId("");
   };
 
   const handlePay = async (method) => {
     if (!selectedItem) return;
 
     if (!gameId.trim()) {
-      alert('Введите ваш игровой ID!');
+      alert("Введите ваш игровой ID!");
       return;
     }
 
@@ -44,35 +44,36 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-      const response = await fetch('https://api.donza.site/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("https://api.donza.site/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: selectedItem.price,
           orderId,
           gameId: gameId.trim(),
           uc: selectedItem.uc,
-          method  // 44 - СБП, 36 - карты, 35 - QIWI
-        })
+          method, // 44 — СБП, 36 — карты, 35 — QIWI
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = data.link;  // Полный редирект на страницу оплаты
+        window.location.replace(data.link); // Усиленный редирект — полностью заменяет текущую страницу
+        // Альтернатива: window.open(data.link, '_blank', 'noopener,noreferrer');
       } else {
-        alert(data.error || 'Ошибка создания заказа');
+        alert(data.error || "Ошибка создания заказа");
       }
     } catch (error) {
-      console.error('Ошибка:', error);
-      alert('Ошибка соединения с сервером');
+      console.error("Ошибка:", error);
+      alert("Ошибка соединения с сервером");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', padding: '50px 15px' }}>
+    <div style={{ minHeight: "100vh", padding: "50px 15px" }}>
       <div className="container">
         <h2 className="text-center mb-4 text-white">Магазин UC</h2>
         <div className="row g-4">
@@ -81,19 +82,16 @@ export default function Shop() {
               <div
                 className="card h-100 text-center shadow-sm"
                 style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                  backdropFilter: 'blur(5px)',
-                  borderRadius: '10px',
-                  color: '#fff',
+                  backgroundColor: "rgba(0, 0, 0, 0.4)",
+                  backdropFilter: "blur(5px)",
+                  borderRadius: "10px",
+                  color: "#fff",
                 }}
               >
                 <div className="card-body">
                   <h5 className="card-title">{item.uc} UC</h5>
                   <p className="card-text">{item.price} ₽</p>
-                  <button
-                    className="btn btn-success"
-                    onClick={() => openModal(item)}
-                  >
+                  <button className="btn btn-success" onClick={() => openModal(item)}>
                     Купить
                   </button>
                 </div>
@@ -106,51 +104,57 @@ export default function Shop() {
       {showModal && selectedItem && (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
             zIndex: 1000,
           }}
         >
           <div
             style={{
-              backgroundColor: '#fff',
-              borderRadius: '12px',
-              padding: '30px',
-              maxWidth: '600px',
-              width: '90%',
-              textAlign: 'center',
-              color: '#333',
-              position: 'relative',
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+              padding: "30px",
+              maxWidth: "600px",
+              width: "90%",
+              textAlign: "center",
+              color: "#333",
+              position: "relative",
             }}
           >
             <button
               onClick={closeModal}
               style={{
-                position: 'absolute',
-                top: '10px',
-                right: '15px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
+                position: "absolute",
+                top: "10px",
+                right: "15px",
+                background: "none",
+                border: "none",
+                fontSize: "24px",
+                cursor: "pointer",
               }}
             >
               ×
             </button>
 
-            <h4 style={{ marginBottom: '20px' }}>
+            <h4 style={{ marginBottom: "20px" }}>
               {selectedItem.uc} UC ({selectedItem.price} ₽)
             </h4>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+            <div style={{ marginBottom: "20px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontWeight: "bold",
+                }}
+              >
                 Введите ваш игровой ID (куда зачислить UC):
               </label>
               <input
@@ -159,22 +163,22 @@ export default function Shop() {
                 onChange={(e) => setGameId(e.target.value)}
                 placeholder="Ваш ID / ник / UID"
                 style={{
-                  width: '100%',
-                  padding: '10px',
-                  fontSize: '1rem',
-                  borderRadius: '6px',
-                  border: '1px solid #ccc',
+                  width: "100%",
+                  padding: "10px",
+                  fontSize: "1rem",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
                 }}
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <button
                 className="btn btn-primary btn-lg"
                 onClick={() => handlePay(44)}
                 disabled={loading || !gameId.trim()}
               >
-                {loading ? 'Загрузка...' : 'СБП (QR-код)'}
+                {loading ? "Загрузка..." : "СБП (QR-код)"}
               </button>
 
               <button
@@ -182,7 +186,7 @@ export default function Shop() {
                 onClick={() => handlePay(36)}
                 disabled={loading || !gameId.trim()}
               >
-                {loading ? 'Загрузка...' : 'Банковская карта'}
+                {loading ? "Загрузка..." : "Банковская карта"}
               </button>
 
               <button
@@ -190,7 +194,7 @@ export default function Shop() {
                 onClick={() => handlePay(35)}
                 disabled={loading || !gameId.trim()}
               >
-                {loading ? 'Загрузка...' : 'QIWI'}
+                {loading ? "Загрузка..." : "QIWI"}
               </button>
             </div>
           </div>
