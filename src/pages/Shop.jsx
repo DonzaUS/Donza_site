@@ -189,10 +189,10 @@ export default function Shop() {
 
               <button
                 className="btn btn-info btn-lg"
-                onClick={() => handlePay(35)}
+                onClick={() => handlePay(41)}
                 disabled={loading || !gameId.trim()}
               >
-                {loading ? 'Загрузка...' : 'QIWI'}
+                {loading ? 'Загрузка...' : 'VISA / MasterCard KZT'}
               </button>
             </div>
           </div>
