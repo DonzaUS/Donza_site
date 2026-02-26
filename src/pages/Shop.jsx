@@ -44,7 +44,7 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
 
-      const response = await fetch('https://api.donza.site/create-payment', {
+      const response = await fetch('https://donza-webhook.onrender.com/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
