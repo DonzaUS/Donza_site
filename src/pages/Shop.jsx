@@ -2,15 +2,15 @@ import { useState } from 'react';
 
 export default function Shop() {
   const items = [
-    { uc: 325, price: 450 },
-    { uc: 660, price: 820 },
-    { uc: 1320, price: 1600 },
-    { uc: 1800, price: 2050 },
-    { uc: 3850, price: 3995 },
-    { uc: 8100, price: 7900 },
-    { uc: 16200, price: 15800 },
-    { uc: 24300, price: 23700 },
-    { uc: 32400, price: 31600 },
+    { uc: 325, price: 400 },
+    { uc: 660, price: 780 },
+    { uc: 1320, price: 1540 },
+    { uc: 1800, price: 1980 },
+    { uc: 3850, price: 3800 },
+    { uc: 8100, price: 7600 },
+    { uc: 16200, price: 15200 },
+    { uc: 24300, price: 22800 },
+    { uc: 32400, price: 30400 },
   ];
 
   const [showModal, setShowModal] = useState(false);
