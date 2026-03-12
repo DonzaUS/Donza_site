@@ -18,6 +18,9 @@ export default function Shop() {
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ← Флаг: true — показываем карты, false — скрываем (только СБП)
+  const showCardPayments = false;
+
   const openModal = (item) => {
     setSelectedItem(item);
     setGameId('');
@@ -52,16 +55,14 @@ export default function Shop() {
           orderId,
           gameId: gameId.trim(),
           uc: selectedItem.uc,
-          method  // 44 — СБП, 36 — карты, 35 — QIWI
+          method
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        window.location.replace(data.link);  // Полный редирект — браузер полностью перейдёт на оплату
-        // Альтернатива (если редирект блокируется): 
-        // window.open(data.link, '_blank', 'noopener,noreferrer');
+        window.location.replace(data.link);
       } else {
         alert(data.error || 'Ошибка создания заказа');
       }
@@ -179,21 +180,25 @@ export default function Shop() {
                 {loading ? 'Загрузка...' : 'СБП (QR-код)'}
               </button>
 
-              <button
-                className="btn btn-success btn-lg"
-                onClick={() => handlePay(36)}
-                disabled={loading || !gameId.trim()}
-              >
-                {loading ? 'Загрузка...' : 'Банковская карта'}
-              </button>
+              {showCardPayments && (
+                <button
+                  className="btn btn-success btn-lg"
+                  onClick={() => handlePay(36)}
+                  disabled={loading || !gameId.trim()}
+                >
+                  {loading ? 'Загрузка...' : 'Банковская карта'}
+                </button>
+              )}
 
-              <button
-                className="btn btn-info btn-lg"
-                onClick={() => handlePay(41)}
-                disabled={loading || !gameId.trim()}
-              >
-                {loading ? 'Загрузка...' : 'VISA / MasterCard KZT'}
-              </button>
+              {showCardPayments && (
+                <button
+                  className="btn btn-info btn-lg"
+                  onClick={() => handlePay(41)}
+                  disabled={loading || !gameId.trim()}
+                >
+                  {loading ? 'Загрузка...' : 'VISA / MasterCard KZT'}
+                </button>
+              )}
             </div>
           </div>
         </div>
