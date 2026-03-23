@@ -1,16 +1,18 @@
 import { useState } from 'react';
+import ProductPrice from '../components/ProductPrice'; // 👈 Импортируем компонент
 
 export default function Shop() {
+  // 👇 МЕНЯЕМ: теперь цены в ДОЛЛАРАХ, а не в рублях
   const items = [
-    { uc: 325, price: 400 },
-    { uc: 660, price: 780 },
-    { uc: 1320, price: 1540 },
-    { uc: 1800, price: 1980 },
-    { uc: 3850, price: 3800 },
-    { uc: 8100, price: 7600 },
-    { uc: 16200, price: 15200 },
-    { uc: 24300, price: 22800 },
-    { uc: 32400, price: 30400 },
+    { uc: 325, usdPrice: 4.44 },    // было 400₽ (при курсе 90)
+    { uc: 660, usdPrice: 8.67 },     // было 780₽
+    { uc: 1320, usdPrice: 17.11 },   // было 1540₽
+    { uc: 1800, usdPrice: 22.00 },   // было 1980₽
+    { uc: 3850, usdPrice: 42.22 },   // было 3800₽
+    { uc: 8100, usdPrice: 84.44 },   // было 7600₽
+    { uc: 16200, usdPrice: 168.89 }, // было 15200₽
+    { uc: 24300, usdPrice: 253.33 }, // было 22800₽
+    { uc: 32400, usdPrice: 337.78 }, // было 30400₽
   ];
 
   const [showModal, setShowModal] = useState(false);
@@ -34,6 +36,18 @@ export default function Shop() {
     setGameId('');
   };
 
+  // 👇 НОВАЯ ФУНКЦИЯ для получения актуальной цены в рублях
+  const getCurrentRubPrice = async (usdPrice) => {
+    try {
+      const response = await fetch('https://www.cbr-xml-daily.ru/daily_json.js');
+      const data = await response.json();
+      const rate = data.Valute.USD.Value;
+      return Math.round(usdPrice * rate);
+    } catch (error) {
+      return Math.round(usdPrice * 90);
+    }
+  };
+
   const handlePay = async (method) => {
     if (!selectedItem) return;
 
@@ -46,12 +60,15 @@ export default function Shop() {
 
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
+      
+      // 👇 Получаем актуальную цену в рублях перед отправкой
+      const currentRubPrice = await getCurrentRubPrice(selectedItem.usdPrice);
 
       const response = await fetch('https://donza-webhook.onrender.com/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: selectedItem.price,
+          amount: currentRubPrice,  // 👈 Отправляем актуальную цену
           orderId,
           gameId: gameId.trim(),
           uc: selectedItem.uc,
@@ -92,7 +109,9 @@ export default function Shop() {
               >
                 <div className="card-body">
                   <h5 className="card-title">{item.uc} UC</h5>
-                  <p className="card-text">{item.price} ₽</p>
+                  <p className="card-text">
+                    <ProductPrice usdPrice={item.usdPrice} />  {/* 👈 ЗАМЕНИЛИ */}
+                  </p>
                   <button
                     className="btn btn-success"
                     onClick={() => openModal(item)}
@@ -149,7 +168,7 @@ export default function Shop() {
             </button>
 
             <h4 style={{ marginBottom: '20px' }}>
-              {selectedItem.uc} UC ({selectedItem.price} ₽)
+              {selectedItem.uc} UC (<ProductPrice usdPrice={selectedItem.usdPrice} />)  {/* 👈 ЗАМЕНИЛИ */}
             </h4>
 
             <div style={{ marginBottom: '20px' }}>
