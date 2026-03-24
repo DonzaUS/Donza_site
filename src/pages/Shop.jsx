@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import ProductPrice from '../components/ProductPrice'; // 👈 Импортируем компонент
+import ProductPrice from '../components/ProductPrice';
 
 export default function Shop() {
-  // 👇 МЕНЯЕМ: теперь цены в ДОЛЛАРАХ, а не в рублях
+  // Цены в ДОЛЛАРАХ
   const items = [
     { uc: 325, usdPrice: 5.00 },    // было 400₽ (при курсе 90)
     { uc: 660, usdPrice: 9.88 },     // было 780₽
@@ -20,7 +20,7 @@ export default function Shop() {
   const [gameId, setGameId] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ← Флаг: true — показываем карты, false — скрываем (только СБП)
+  // Флаг: true — показываем карты, false — скрываем (только СБП)
   const showCardPayments = false;
 
   const openModal = (item) => {
@@ -36,18 +36,6 @@ export default function Shop() {
     setGameId('');
   };
 
-  // 👇 НОВАЯ ФУНКЦИЯ для получения актуальной цены в рублях
-  const getCurrentRubPrice = async (usdPrice) => {
-    try {
-      const response = await fetch('https://www.cbr-xml-daily.ru/daily_json.js');
-      const data = await response.json();
-      const rate = data.Valute.USD.Value;
-      return Math.round(usdPrice * rate);
-    } catch (error) {
-      return Math.round(usdPrice * 90);
-    }
-  };
-
   const handlePay = async (method) => {
     if (!selectedItem) return;
 
@@ -61,14 +49,12 @@ export default function Shop() {
     try {
       const orderId = `order-${selectedItem.uc}-${Date.now()}`;
       
-      // 👇 Получаем актуальную цену в рублях перед отправкой
-      const currentRubPrice = await getCurrentRubPrice(selectedItem.usdPrice);
-
+      // Отправляем цену в ДОЛЛАРАХ! Сервер сам сконвертирует в рубли
       const response = await fetch('https://donza-webhook.onrender.com/create-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: currentRubPrice,  // 👈 Отправляем актуальную цену
+          amount: selectedItem.usdPrice,  // ← ДОЛЛАРЫ!
           orderId,
           gameId: gameId.trim(),
           uc: selectedItem.uc,
@@ -110,7 +96,7 @@ export default function Shop() {
                 <div className="card-body">
                   <h5 className="card-title">{item.uc} UC</h5>
                   <p className="card-text">
-                    <ProductPrice usdPrice={item.usdPrice} />  {/* 👈 ЗАМЕНИЛИ */}
+                    <ProductPrice usdPrice={item.usdPrice} />
                   </p>
                   <button
                     className="btn btn-success"
@@ -168,7 +154,7 @@ export default function Shop() {
             </button>
 
             <h4 style={{ marginBottom: '20px' }}>
-              {selectedItem.uc} UC (<ProductPrice usdPrice={selectedItem.usdPrice} />)  {/* 👈 ЗАМЕНИЛИ */}
+              {selectedItem.uc} UC (<ProductPrice usdPrice={selectedItem.usdPrice} />)
             </h4>
 
             <div style={{ marginBottom: '20px' }}>

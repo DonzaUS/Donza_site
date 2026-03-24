@@ -1,36 +1,32 @@
 import { useState, useEffect } from 'react';
-import { getUsdRate } from '../utils/currency';
 
 const ProductPrice = ({ usdPrice }) => {
   const [rubPrice, setRubPrice] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPrice = async () => {
+    const fetchRate = async () => {
       try {
-        const rate = await getUsdRate();
-        const rubAmount = usdPrice * rate;
-        setRubPrice(Math.round(rubAmount));
+        const response = await fetch('https://donza-webhook.onrender.com/api/rate');
+        const data = await response.json();
+        if (data.success) {
+          setRubPrice(Math.round(usdPrice * data.rate));
+        } else {
+          setRubPrice(usdPrice * 90);
+        }
       } catch (error) {
-        console.error('Ошибка:', error);
+        console.error('Ошибка получения курса:', error);
         setRubPrice(usdPrice * 90);
-      } finally {
-        setLoading(false);
       }
     };
-
-    fetchPrice();
+    
+    fetchRate();
   }, [usdPrice]);
 
-  if (loading) {
-    return <span>...</span>;
+  if (rubPrice === null) {
+    return <span>---</span>;
   }
 
-  return (
-    <>
-      {rubPrice} ₽
-    </>
-  );
+  return <>{rubPrice} ₽</>;
 };
 
 export default ProductPrice;
