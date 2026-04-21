@@ -5,14 +5,14 @@ export default function Shop() {
   // Цены в ДОЛЛАРАХ
   const items = [
     { uc: 325, usdPrice: 5.00 },    // было 400₽ (при курсе 90)
-    { uc: 660, usdPrice: 10.00 },     // было 780₽
-    { uc: 1320, usdPrice: 20.00 },   // было 1540₽
-    { uc: 1800, usdPrice: 25.50 },   // было 1980₽
-    { uc: 3850, usdPrice: 49.80 },   // было 3800₽
-    { uc: 8100, usdPrice: 97.00 },   // было 7600₽
-    { uc: 16200, usdPrice: 194.00 }, // было 15200₽
-    { uc: 24300, usdPrice: 291.00 }, // было 22800₽
-    { uc: 32400, usdPrice: 388.00 }, // было 30400₽
+    { uc: 660, usdPrice: 10.30 },     // было 780₽
+    { uc: 1320, usdPrice: 20.50 },   // было 1540₽
+    { uc: 1800, usdPrice: 26.00 },   // было 1980₽
+    { uc: 3850, usdPrice: 50.00 },   // было 3800₽
+    { uc: 8100, usdPrice: 98.00 },   // было 7600₽
+    { uc: 16200, usdPrice: 196.00 }, // было 15200₽
+    { uc: 24300, usdPrice: 294.00 }, // было 22800₽
+    { uc: 32400, usdPrice: 392.00 }, // было 30400₽
   ];
 
   const [showModal, setShowModal] = useState(false);
